@@ -6,5 +6,9 @@
 .log
 .gsheet
 .httr-oauth
-.ini
+*.ini
 .jpeg
+
+Analysis of Ecosystems/
+Homework/
+readings/
