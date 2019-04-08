@@ -1,0 +1,47 @@
+---
+title: "Analysis of Ecosystems homework assignment No. 1"
+output: word_document
+date: "Put you name and assignment due date here"
+---
+```{r setup, echo=FALSE, results='hide'}
+# Don't mess with this code chunk
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(knitr, s20x, plyr,ggplot2)
+opts_chunk$set(message = FALSE, warning=FALSE, echo=TRUE, results='verbatim')
+```
+# Data preparation 
+This assignment depends on mtcars2, our customized data.frame based on mtcars. But the .Rmd file is self-contained and doesn't know about mtcars2 yet, so we need to tell it where to find it. Check the code below and modify as necessary to load mtcars2 directly from where you saved it (do not set working directories with setwd() in .Rmd files). 
+```{r }
+# load("E:/R/data/mtcars2.Rdata")
+load("C:/Users/devan.mcgranahan/Google Drive/Teaching/Classes/Analysis of Ecosystems/r/data/mtcars2.Rdata") 
+str(mtcars2)
+```
+
+# Calculating summary statistics
+## Using base function aggregate
+Modify the code below to calculate mean horsepower for cars of different origins and number of cylinders.  
+
+```{r }
+# aggregate(?? ~ cyl + ??, data=mtcars2, FUN=??) 
+```
+## Using ddply
+Insert code below to do the same with the ddply function from the plyr package.   
+```{r }
+# Insert ddply call here:
+```
+# Inserting graphs
+## Boxplot
+Modify the code below to make a boxplot of the data summarized above. 
+```{r }
+  ??(?? ~ cyl + ??, mtcars2, xaxt="n", 
+          xlab="Number of cylinders", ylab="Horsespower", 
+          cex.lab=1.3, cex.axis=1.3, las=1, lwd=2, col=c("blue","orange"))
+  axis(side=1, at=c(1.5,3.5, 5.5), labels=c("4", "6", "8"), cex.lab=1.3)
+  legend("topleft", title="Origin", c("Foreign","Domestic"), 
+         fill=c("blue", "orange"), cex=1.2, bty="n")
+```
+## Scatterplot
+Modify the code below to insert any scatterplot you can manage, no matter how simple. Try using a \texttt{ggplot} function like \texttt{qplot()} or \texttt{ggplot()}. You can modify it as little or as much as you want. 
+```{r }
+# Insert scatterplot code here. 
+```

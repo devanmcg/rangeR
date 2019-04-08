@@ -1,0 +1,208 @@
+---
+title: "Analysis of Ecosystems homework week 3"
+subtitle: "Data visualization "
+date: "The assignment"
+output:
+  pdf_document: default
+  word_document: default
+urlcolor: blue
+---
+
+```{r echo=FALSE, results='hide'}
+# Don't mess with this chunk!
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, echo = FALSE, eval=FALSE)
+```
+
+```{r packages, echo=FALSE}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(s20x, plyr, tidyverse, viridis, grid, gridExtra, cowplot)
+```
+
+# Graph critique 
+
+The following figure comes from a [recent paper in Nature Ecology & Evolution](https://www.nature.com/articles/s41559-018-0752-7) by Clements & Hay. Offer a critique of these graphs, in terms of what we've read and discussed in class. What are some good elements of the graphs? What is poor, and how could it be improved? 
+
+
+\begin{figure}[!h]
+\includegraphics[width=1\textwidth]{ClementsHayJitteredBarPlotsCropped.PNG}
+\caption{Clements \& Hay. 2019. Biodiversity enhances coral growth, tissue survivorship and suppression of macroalgae. Nature ecology \& evolution. DOI: https://doi.org/10.1038/s41559-018-0752-7}\label{NatureFig}
+\end{figure}
+
+
+# Re-draw graphs
+
+## Load the data 
+
+Data for Fig. \ref{NatureFig}b are available in  [\texttt{ClementsHay2019.csv}](https://drive.google.com/file/d/1DpxQQb4xAmJxRlt1J2AtVidzhFd5OSyd/view?usp=sharing). 
+
+* Load these data into \texttt{R}. 
+* Show the structure of the data. 
+* Give your own assessment/description of the variables. 
+* \emph{Does anything about the data make you re-think your answer above??}
+
+```{r data, results='verbatim'}
+corals <- read.csv("C:/Users/Devan.McGranahan/GoogleDrive/Teaching/Classes/Analysis of Ecosystems/compiled notes/course materials/3 - data visualization/ClementsHay2019.csv")
+str(corals)
+```
+
+
+## Distribution graphs
+
+* Present one or more graphs that redraw Fig. \ref{NatureFig}b in ways that emphasize the distribution of the data. 
+* Briefly describe how these visualizations differ from Fig. \ref{NatureFig}b. Are there different patterns? 
+
+```{r dist_gg}
+# Get a couple colours from the magma gradient in the viridis package
+prov.col2 <- viridis::magma(n=2, begin=0.4, end=0.8, direction = -1) 
+
+ggplot(corals, aes(x=Species, y=MassChangePrct)) + theme_bw(14) + 
+  geom_hline(yintercept=0, color="darkgrey", size=1) + 
+  geom_boxplot(aes(fill=Treatment), size=1.5) + 
+  scale_fill_manual(values=prov.col2) +
+  labs(y="Mass change (%)") +
+  theme(legend.position = "top", 
+        axis.text.x = element_text(color="black", face="italic"))
+
+ggplot(corals, aes(x=Species, y=MassChangePrct)) + theme_bw(14) + 
+  geom_hline(yintercept=0, color="darkgrey", size=1) + 
+  geom_violin(aes(fill=Treatment), size=1.5) + 
+  geom_jitter(aes(shape=Treatment, color=Rep), 
+              alpha=0.5, # color="black", 
+              position = position_jitterdodge(jitter.width=0.33,
+                                              dodge.width = 0.9)) +
+  scale_shape_manual(values=c(19, 1)) +
+  scale_color_viridis(guide=FALSE) +
+  scale_fill_manual(values=prov.col2) +
+  labs(y="Mass change (%)", 
+       caption= "Colors denote unique plots.") +
+  theme(legend.position = "top", 
+        axis.text.x = element_text(color="black", face="italic"))
+```
+
+## Calculate summary statistics
+
+Calculate meaningful summary statistics that would be useful for comparing the treatment effect as presented in Fig. \ref{NatureFig}b.
+
+
+```{r summary_stats, results='verbatim'}
+ddply(corals, .(Species, Treatment), 
+               summarize, 
+               mean = mean(MassChangePrct), 
+               se = sd(MassChangePrct)/sqrt(length(MassChangePrct)) ) %>%
+  knitr::kable(., caption="Summary statistics for the coral data. Note how easily this nicely-formatted table was created by piping the results of \\texttt{ddply} into the \\texttt{kable} function, available in the \\texttt{knitr} package.", digits=1)
+```
+
+## Graph the mean effect
+
+Present a graph with means and an appropriate measure of variance that represents the test conducted in the P-values in Fig. \ref{NatureFig}b. Maximize your $data:ink$ ratio. 
+
+```{r results='verbatim', fig.height=8, fig.keep='last', fig.cap="Two takes on plotting the mean. The bottom graph shows the same means and standard errors as the first, but overlaid on plot means that show the variability among plots within each treatment group."}
+  corals %>%
+    group_by(Species, Treatment) %>%
+      summarize(mean = mean(MassChangePrct), 
+               se = sd(MassChangePrct)/sqrt(length(MassChangePrct)), 
+               count = n() ) %>%
+  ggplot(aes(x=Species, y=mean, color=Treatment)) + theme_bw(14) + 
+    geom_hline(yintercept=0, color="darkgrey", size=1) + 
+    geom_errorbar(aes(ymin=mean-se, ymax=mean+se), 
+                  size=1.5, width = 0.25,
+                  position= position_dodge(0.5)) +
+    geom_point(aes(shape=Treatment, fill=Treatment), 
+               color="black", size=4, stroke=1.5, 
+                  position= position_dodge(0.5)) +
+    scale_shape_manual(values=c(21, 24)) +
+    scale_color_manual(values=prov.col2) +
+    scale_fill_manual(values=prov.col2) +
+    labs(y="Mean mass change (%)") +
+    coord_cartesian(ylim = c(0,150)) +
+    geom_text(aes(y=10, group=Treatment, label=count), 
+              color="black", 
+              position = position_dodge(0.5)) +
+    theme(legend.position = "top", 
+          axis.text.x = element_text(color="black", face="italic")) -> means
+
+RepMeans <- 
+  corals %>%
+    group_by(Species, Treatment, Rep) %>%
+      summarize(mean = mean(MassChangePrct), 
+               se = sd(MassChangePrct)/sqrt(length(MassChangePrct)) ) 
+TreatMeans <-
+corals %>%
+    group_by(Species, Treatment) %>%
+      summarize(mean = mean(MassChangePrct), 
+               se = sd(MassChangePrct)/sqrt(length(MassChangePrct)), 
+               count = n() )
+
+  ggplot(data=RepMeans, 
+         aes(x=Species, y=mean, color=Treatment)) + theme_bw(14) + 
+    geom_hline(yintercept=0, color="darkgrey", size=1) + 
+    geom_linerange(data=RepMeans, 
+                   aes(ymin=mean-se, ymax=mean+se, 
+                       group=interaction(Rep, Treatment)), 
+                  size=1.5, alpha=0.25,
+                 position= position_jitterdodge(dodge.width=0.5, seed=2)) +
+    geom_point(data=RepMeans,
+               aes(color=Treatment, 
+                    group=interaction(Rep, Treatment)), 
+               size=4, stroke=1.5, alpha=0.25,
+                  position= position_jitterdodge(dodge.width=0.5, seed=2)) +
+    scale_shape_manual(values=c(21, 24)) +
+    scale_color_manual(values=prov.col2) +
+    scale_fill_manual(values=prov.col2) +
+    labs(y="Mean mass change (%)") +
+    geom_errorbar(data = TreatMeans, 
+        aes(x=Species, ymin=mean-se, ymax=mean+se, color=Treatment), 
+         size=1.5, width=0.25, 
+        position = position_dodge(width=0.5)) +
+    geom_point(data=TreatMeans,
+           aes(fill=Treatment, 
+               shape=Treatment), 
+           color="black", size=5, stroke=1.5, 
+        position = position_dodge(width=0.5)) + 
+    geom_text(data=TreatMeans, 
+              aes(y=10, group=Treatment, label=count), 
+              color="black", 
+              position = position_dodge(0.5)) +
+    theme(legend.position = "top", 
+          axis.text.x = element_text(color="black", face="italic")) -> means2
+#
+# Some advanced ggplotting using packages gridExtra and cowplot
+#
+  
+ # Prepare Grobs 
+  grid.grob <- arrangeGrob(means + theme(legend.position = "none", 
+                                       axis.title=element_blank()), 
+                          means2 + theme(legend.position = "none", 
+                                       axis.title=element_blank()))
+
+#create common labels
+
+  x.grob <- textGrob("Species",
+                  gp=gpar(fontface="bold",fontsize=14))
+  y.grob <- textGrob("Mean mass change (%)", rot=90, 
+                gp=gpar(fontface="bold",fontsize=14))
+
+# Combine panels and labels
+
+  plot.grob <- grid.arrange(arrangeGrob(grid.grob, left = y.grob, 
+                                                   bottom = x.grob))
+# Grab a legend
+  legend.grob <- cowplot::get_legend(means + theme(legend.position="top"))
+
+# Combine labeled plot grid & legend 
+  plot_grid(legend.grob, plot.grob, 
+            ncol=1, rel_heights = c(0.1, 0.9))
+# \clearpage
+```
+
+
+  
+
+
+# Reflection 
+
+Reflect on the different ways these data can be presented. Some thoughts include:
+
+* How are they visually different? 
+* How are they different in terms of data representation? 
+* Do the different ways of visualizing these data affect your interpretation in terms of the hypothesis (difference among treatments)? 

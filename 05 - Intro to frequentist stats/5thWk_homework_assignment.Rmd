@@ -1,0 +1,184 @@
+---
+title: "Analysis of Ecosystems homework week 5"
+subtitle: "Intro to statistical inference"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+author: "The assignment"
+output: pdf_document
+---
+
+```{r setup, echo=FALSE, results='hide'}
+# Code Chunk 1
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, echo=FALSE, eval=FALSE)
+```
+
+```{r packages, results='hide'}
+# Code Chunk 2
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(s20x, plyr, ggplot2, car, gvlma)
+```
+
+# Data preparation 
+
+This assignment will use data in the \texttt{mpg} data from \texttt{ggplot2}\textemdash \texttt{cty} and \texttt{displ} are provided, and script to add the predictor variable, \texttt{origin}, is already in Code Chunk 3 for you. Note that \texttt{echo=FALSE} so you should not
+see this script in the Word file, but \texttt{results=’verbatim’} so we should see the results of the call to \texttt{str()}.
+
+```{r results='verbatim'}
+# R code chunk 3: Add columns
+# mpg$auto.trans <- with(mpg, ifelse((substring(trans,1,4)=='auto'),1, 0))
+mpg$origin <- as.factor(revalue(mpg$manufacturer, 
+                                c("audi"="Foreign","chevrolet"="USA",
+                                  "dodge"="USA", "ford"="USA","jeep"="USA", 
+                                  "honda"="Foreign", "hyundai"="Foreign",
+                                  "land rover"="Foreign","subaru"="Foreign", 
+                                  "lincoln"="USA", "mercury"="USA", 
+                                  "nissan"="Foreign", "pontiac"="USA", 
+                                  "toyota"="Foreign","volkswagen"="Foreign"))) 
+str(mpg)
+```
+
+# The t test
+
+## Assumptions
+
+Briefly describe three assumptions of the t test. Recall that two of them relate to the data themselves and a third is more about experimental design.
+
+## Distribution 
+
+### Graphing
+
+Make one or more graphs that visualizes the distribution of the response variable \texttt{mpg\$cty} with respect to the assumptions of the t test model. Use and copy Code Chunk 4 as necessary. Relevant items in your toolbox include histograms and density plots, faceting and colour aesthetics, Q-Q plots, and transformations. 
+
+
+```{r results='verbatim', fig=TRUE}
+# Code Chunk 4: distribution assessment 
+  # Add additional code chunks as necessary.
+
+
+
+
+```
+
+### Interpretation
+
+Below the code chunk, respond to the following:
+
+* What do you conclude about the distribution of these data with respect to the assumptions of the t test?
+* Describe what modifications, if any, you applied to the data to better fit model assumptions.
+
+## Variance
+
+### Test
+
+In Code Chunk 5, conduct one or more relevant statistical tests to assess whether variance in the response variable \texttt{mpg\$cty} meets the assumptions of the t test model. Manipulate the data as necessary.
+
+
+```{r results='verbatim'}
+# Code Chunk 5: variance assessment 
+  # Add additional code chunks as necessary
+
+
+
+```
+
+### Interpretation
+
+Below the code chunk, respond to the following:
+
+* What do you conclude about the variance of these data with respect to the assumptions of the t test?
+* Describe the modification you applied to the data to better fit model assumptions.
+
+# The linear model
+
+## Assumptions
+
+Briefly describe four assumptions of the linear regression model.
+
+## Distribution 
+
+### Graphing
+
+Make one or more graphs that visualize the distribution of the response variable \texttt{mpg\$cty} with respect to the assumptions of the linear model. Use and copy Code Chunk 6 as necessary. Relevant items in your toolbox include histograms and density plots, Q-Q plots, and transformations.
+
+
+```{r results='verbatim', fig=TRUE}
+# Code Chunk 6: distribution assessment 
+  # Add additional code chunks as necessary.
+
+
+
+   
+```
+
+### Interpretation
+
+Below the code chunk, respond to the following:
+
+* What do you conclude about the distribution of these data with respect to the assumptions of the linear model?
+* Describe the modification you applied to the data to better fit model assumptions.
+
+## Fit a linear model
+
+### Test
+
+In Code Chunk 7, use \texttt{cty} and \texttt{displ} from \texttt{mpg} as response and predictor variables, respectively, to:
+
+* Fit a linear model using formula notation
+* Provide summary statistics of the model
+
+
+```{r  results='verbatim'}
+# Code Chunk 7: Define a linear model
+
+
+
+```
+
+### Plot
+
+In Code Chunk 8, produce an appropriate graph of the linear model fit above using \texttt{ggplot}. Include the following:
+
+* Data
+* Trendline
+* Informative axis labels
+
+
+```{r results='verbatim', fig=TRUE}
+# Code Chunk 8: Graph two continuous variables and fit a regression line
+
+
+
+
+```
+
+## Evaluate the linear model
+
+### Model fit
+
+Use Code Chunk 9 to evaluate the model fit with respect to assumptions of the linear model. Below the Code Chunk:
+
+* Give an interpretation of model fit
+* Describe what you base this assessment on
+
+
+```{r  results='verbatim', fig=TRUE}
+# Code Chunk 9: Q-Q Plot of residuals and test of model assumptions
+
+
+```
+
+
+### Model results
+
+Report the following from the linear model (enter as text, not \texttt{R} output). When math is required on your part using information from R output, show your work. Provide both the letter that designates the test statistic/parameter as well as the value, separated by an = sign :
+
+* Degrees of freedom
+* Total Sum of Squares (show your math)
+* Test statistic for the overall model
+* Test statistic for the dependent variable
+* Results of significance test
+* How much variation is explained by the linear model?
+
+### Interpretation
+
+Below the code chunk, give your conclusion about the relationship between these variables.
+

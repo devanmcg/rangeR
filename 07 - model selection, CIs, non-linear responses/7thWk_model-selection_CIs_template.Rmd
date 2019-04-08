@@ -1,0 +1,77 @@
+---
+title: "Homework #6 - Model selection and confidence intervals"
+output: word_document
+date: "Put you name and assignment due date here"
+---
+
+```{r echo=FALSE, results='hide'}
+# Code Chunk 1
+knitr::opts_chunk$set(message = FALSE, warning=FALSE)
+```
+```{r echo=TRUE, results='hide'}
+# Code Chunk 2
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(s20x, ggplot2, car, gvlma, AICcmodavg, MASS)
+```
+
+# Data preparation
+
+## Identification
+
+```{r echo=TRUE, results='verbatim'}
+# Code Chunk 3: Data loading and structure
+```
+
+## Assumptions
+
+```{r echo=TRUE, results='verbatim', fig=TRUE}
+# Code Chunk 4: Model assumptions
+
+```
+
+__Text answers:__
+
+* What PDF fits the response variable? 
+* What statistical model will you apply? What are its assumptions, and how do you know the data fit those assumptions?
+
+# Model fitting and selection 
+
+## Define model set
+
+```{r echo=TRUE, results='verbatim', fig=TRUE}
+# Code Chunk 5: Define candidate models 
+
+
+```
+
+
+## Model selection
+
+__Text answers:__
+
+* Which model or models do you consider competitive? Based on what? 
+* What do these models have in common?
+
+## Model averaging
+
+```{r echo=TRUE, results='verbatim'}
+# Code Chunk 6: Average parameter estimates
+
+
+```
+
+## Plot confidence intervals
+
+```{r echo=TRUE, results='verbatim'}
+# Plotting confidence intervals
+
+
+```
+
+__Text answer:__
+
+What does it mean to say confidence intervals report an _effect size_?
+
+# Conclusions
+
+Give your recommendation on which variable(s) most influence employee satisfaction ratings. In your response include magnitude of effect, sign (whether the effect is positive or negative), and compare the effect to other variables, if present. 
