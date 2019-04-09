@@ -7,15 +7,13 @@ don.dat <- subset(comm.dat, landowner=="donald")
 stev.dat <- subset(comm.dat, landowner=="steven")  
 }
 
-{
-install.packages(c("plyr", "tidyverse", "tidyselect", "GGally",
-                   "vegan", "BiodiversityR", "pander"))
-library(plyr)
-library(tidyverse)
-library(tidyselect)
-library(vegan) 
-library(BiodiversityR)
-}
+
+install.packages('pacman') 
+
+pacman::p_load(plyr, tidyverse, tidyselect, GGally,
+                   vegan, devtools, pander)
+pacman::p_load_gh("devanmcg/rangeR")
+
 
 # Create three custom functions:
   # Diversity calculator: 
@@ -72,19 +70,19 @@ library(BiodiversityR)
 	      anova() 
 	
 # Calculate rank abundance by landowner, habitat type
-  # forces BiodiversityR::rankabundance to play along 
-  # It is a convenient function if you use it exactly as written 
+  # forces (a local version) of BiodiversityR::rankabundance to play along 
+  # It is a convenient script if you use it exactly as written 
   # Otherwise, it can be a PITA
 	  ra <- data.frame()
 	  for(i in 1:length(unique(comm.dat$landowner))){
-	    require(dplyr) ; require(BiodiversityR)
+	    require(dplyr) ; require(rangeR)
 	    Ldat <- filter(comm.dat, landowner == unique(landowner)[i]) 
 	    for(j in 1:length(unique(Ldat$habitat))) {
 	      LHdat <- filter(Ldat, habitat==unique(habitat)[j])
 	      cd <- LHdat %>% 
 	              select(., .data$Janis.Joplin : .data$Nicole.Bogner) %>%
 	                as.data.frame() 
-	          ra.d <- as.data.frame(rankabundance(x=cd, 
+	          ra.d <- as.data.frame(RankAbundance(x=cd, 
 	                                y=LHdat, 
 	                                factor='habitat', 
 	                               level=unique(LHdat$habitat) ) ) 

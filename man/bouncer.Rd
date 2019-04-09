@@ -12,23 +12,23 @@ bouncer(data, measure, level, PrintResults)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{data}{a wide-format `data.frame` with species in columns and individual observations (sites) in rows.
+  \item{data}{a wide-format \code{data.frame} with species in columns and individual observations (sites) in rows.
 %%     ~~Describe \code{data} here~~
 }
-  \item{measure}{One of `'abundance'` or `'proportion'`, indicating how the threshold should be determined.
+  \item{measure}{One of \code{'abundance'} or \code{'proportion'}, indicating how the threshold should be determined.
 %%     ~~Describe \code{measure} here~~
 }
   \item{level}{The threshold value below which species will be identified for exclusion.
 %%     ~~Describe \code{level} here~~
 }
-  \item{PrintResults}{Optional. Logical. Should the number of species identified for exclusion be displayed as a message in the console? Leave out or set `'FALSE'` if called in a Markdown file.
+  \item{PrintResults}{Optional. Logical. Should the number of species identified for exclusion be displayed as a message in the console? Leave out or set \code{'FALSE'} if called in a \code{Markdown}-like file.
 %%     ~~Describe \code{PrintResults} here~~
 }
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
 }
-\value{A vector of species names.
+\value{A vector of species identified by column names.
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 %%  \item{comp1 }{Description of 'comp1'}
@@ -41,13 +41,15 @@ bouncer(data, measure, level, PrintResults)
 \author{Devan Allen McGranahan (devan.mcgranahan@gmail.com)
 %%  ~~who you are~~
 }
-\note{
+\note{Depends heavily on a stand-alone version of the \code{rankabundance} function from Kindt & Coe's \code{BiodiversityR} package. 
+
+Function only returns species for exclusion. Additional step(s) must be taken to pare down dataset, see \strong{Examples}.
 %%  ~~further notes~~
 }
 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
+\seealso{\code{\link{RankAbundance}}
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{

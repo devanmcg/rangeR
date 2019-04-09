@@ -1,4 +1,4 @@
-install.packages(c("vegan","dplyr")) 
+install.packages(c("vegan","dplyr", "devtools")) 
 library(vegan)
 
 data(dune)
@@ -6,9 +6,10 @@ data(dune.env)
 
 # Load some custom functions
 
-source("https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomCommunityFunctions.R")
-
-devtools::install_github("devanmcg/rangeR")
+  # Try this first: 
+    devtools::install_github("devanmcg/rangeR")
+  # If it doesn't work though, try this:
+    source("https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomCommunityFunctions.R")
 
 
 # vegan::capscale offers a metric solution to Multi-Dimension Scaling
@@ -23,7 +24,7 @@ devtools::install_github("devanmcg/rangeR")
   scores(dune.e.k2, display="species")[1:10,]
   scores(dune.e.mds, display="species")[1:10,]
   
-  var.view(dune.e.mds, 10)
+  str(var.view(dune.e.mds, 10) ) 
 
 # As with before, any ordination based on 
 #  Euclidean distance = PCA (= unconstrained RDA):
