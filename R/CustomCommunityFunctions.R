@@ -83,22 +83,3 @@ bouncer <- function(data, measure, level, PrintResults) {
           message(mess) 
            return(rownames(cuts)) 
           } }
-
-
-
-
-theme_ord <- function (base_size = 12, base_family = "") 
-{
-  theme_grey(base_size = base_size, base_family = base_family) %+replace% 
-    theme(axis.text = element_text(size = rel(0.9)), 
-          axis.title = element_text(face="bold"),
-          axis.ticks = element_line(colour = "black"), 
-          strip.text = element_text(face="bold"),
-          legend.key = element_rect(colour = "grey80"), 
-          panel.background = element_rect(fill = "white", colour = NA), 
-          panel.border = element_rect(fill = NA, colour = "grey50"), 
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(), 
-          plot.margin = unit(c(2,10,2,2), "mm"), 
-          strip.background = element_rect(fill = "lightgreen", colour = "grey50", size = 0.2))
-}
