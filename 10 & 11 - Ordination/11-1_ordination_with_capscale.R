@@ -6,7 +6,9 @@ data(dune.env)
 
 # Load some custom functions
 
-source("https://raw.githubusercontent.com/devanmcg/rangeR/master/CustomCommunityFunctions.R")
+source("https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomCommunityFunctions.R")
+
+devtools::install_github("devanmcg/rangeR")
 
 
 # vegan::capscale offers a metric solution to Multi-Dimension Scaling
