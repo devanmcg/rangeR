@@ -1,6 +1,6 @@
-install.packages(c("vegan","dplyr", "devtools")) 
-library(vegan)
+install.packages(c("vegan",'vegan3d',"dplyr", "devtools")) 
 
+library(vegan)
 data(dune)
 data(dune.env)
 
@@ -16,15 +16,9 @@ data(dune.env)
 # Allows constrained and unconstrained ordination with any distance measure
 
   (dune.e.mds <- capscale(dune ~ 1, distance="euclidean") ) 
-
-# What is gained with metric MDS vs. non-metric? 
-
-  (dune.e.k2 <- metaMDS(dune, k=2, dist="euc", trace=0) )
+  plot(dune.e.mds)
   
-  scores(dune.e.k2, display="species")[1:10,]
-  scores(dune.e.mds, display="species")[1:10,]
-  
-  str(var.view(dune.e.mds, 10) ) 
+  var.view(dune.e.mds, 10) 
 
 # As with before, any ordination based on 
 #  Euclidean distance = PCA (= unconstrained RDA):
@@ -48,10 +42,10 @@ data(dune.env)
 # Comparing ordinations
 # "default"  vs. "optimized" Bray-Curtis mDS
   (pro1 <- procrustes(dune.sb.mds, dune.b.mds) ) # little difference (PSS)
-  plot(pro1)
+  plot(pro1, main="default MDS vs. optimized MDS")
 # optimized B-C mMDS vs. Euc mDS (=PCA)
   (pro2 <- procrustes(dune.e.mds, dune.sb.mds) ) # Much more difference (PSS)
-  plot(pro2)
+  plot(pro2, main="Euclidean MDS vs. optimized BC MDS")
   
 # Improving ordination performance 
 # Summarize species by overall abundance
@@ -79,19 +73,24 @@ data(dune.env)
     var.view(dune.cap, 6)
     var.view(dune.cut.mds, 5)
   # Hypothesis testing 
-    envfit(dune.cut.mds ~ A1, permutations = 199)
+    (A1.fit <- envfit(dune.cut.mds ~ A1, permutations = 199, choices=c(1:3)) )
     anova(dune.cap, permutations = 199)
     adonis(dune.Alist ~ A1, permutations = 199)
 
 # Illustrating effect of constrained ordination:
   x11(12,6) ;	par(mgp=c(4, 1, 0), mar=c(6, 6, 1, 1), las=1, mfrow=c(1,2), cex.lab=1.2, cex.axis=1.2)
-# Constrained
-  plot(dune.cap, main="constrained") 
 # Unconstrained
-  plot(dune.cut.mds, main="unconstrained") ; plot(envfit(dune.cut.mds ~ A1), p.max=0.1)
+  plot(dune.cut.mds, main="unconstrained") ; plot(A1.fit)
+  # Constrained
+  plot(dune.cap, main="constrained") 
   dev.off() 
 # View the shifts in site scores
-  plot(procrustes(dune.cap, dune.cut.mds) ) 
-
+  plot(procrustes(dune.cap, dune.cut.mds), main="Constrained vs. unconstrained ordination" ) 
+  
+  library(vegan3d)
+    ordirgl(dune.cap, display = "sites", type = "p",
+            ax.col = "white")
+   ordirgl(dune.cut.mds, display = "sites", envfit=A1.fit, 
+            type = "p", ax.col = "white", arr.col="blue")
 
 
