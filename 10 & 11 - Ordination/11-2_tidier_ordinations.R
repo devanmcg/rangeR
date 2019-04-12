@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 install.packages(c("vegan", "plyr", "dplyr", "tibble", "ggplot2", "devtools", "gridExtra")) 
 devtools::install_github("jfq3/ggordiplots")
+=======
+install.packages(c("vegan", "plyr", "dplyr", "tibble", "ggplot2", "ggordiplots", "gridExtra")) 
+>>>>>>> d3574484e7636c7eb7687574d8a6dc68d06bc0b8
 
 
 source("https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomCommunityFunctions.R")
