@@ -1,3 +1,4 @@
+install.packages(c("pacman"))
 pacman::p_load(tidyverse, GGally, vegan)
 
 URL <- "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ_yUojL2UJzcc68c2Akg1y-vALi9IllQnN_zbMfKJeFOflcV_43EdbWENhzz7JP5HMrmwglgpNQYFu/pub?gid=487538710&single=true&output=csv"
