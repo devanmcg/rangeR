@@ -1,4 +1,4 @@
-Station Name,Latitude,Longitude,Elevation,Year,Month,Day,Max Temp,Avg Bare Soil Temp,Max Wind Speed
+StationName,Latitude,Longitude,Elevation,Year,Month,Day,MaxTemp,AvgBareSoilTemp,MaxWindSpeed
 Ada,47.3211,-96.5139,910,2016,8,1,82.878,78.191,20.431
 Ada,47.3211,-96.5139,910,2016,8,8,80.857,74.836,20.324
 Ada,47.3211,-96.5139,910,2016,8,15,78.841,72.752,19.327
