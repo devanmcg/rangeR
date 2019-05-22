@@ -1,0 +1,60 @@
+---
+title: "Analysis of Ecosystems homework assignment No. 2"
+output: word_document
+date: "Put you name and assignment due date here"
+---
+```{r echo=FALSE, results='hide'}
+knitr::opts_chunk$set(message = FALSE, warning=FALSE)
+```
+```{r echo=TRUE, results='hide'}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(s20x, ggplot2, plyr, grid)
+```
+
+# Data preparation 
+
+Identify data:
+
+```{r echo=TRUE, results='verbatim'}
+str(your_data)
+```
+
+# Calculate summary statistics
+
+
+```{r echo=TRUE, results='verbatim'}
+aggregate(?? ~ ?? + ??, data=??, FUN=mean) 
+```
+
+# Graphs
+## Boxplot
+### Basic
+
+```{r echo=TRUE, results='verbatim'}
+  bp <- ggplot(??) + geom_boxplot(aes(x=??, y=??))
+  bp + labs(x="??", y="??")
+```
+
+### More elaborate
+
+```{r echo=TRUE, results='verbatim'}
+  bp <- ggplot(??) + geom_??(aes(x=??, y=??, ??=??))
+  bp <- bp + labs(x="??", y="??")
+  bp + ????
+```
+
+## Scatterplot
+### Basic
+ 
+```{r echo=TRUE, results='verbatim'}
+sc <- ggplot() + ??_point(??(x=??, y=??))
+sc + labs(x="??", y="??")
+```
+
+### More elaborate
+
+```{r echo=TRUE, results='verbatim'}
+  sc <- ggplot(??) + geom_??(aes(x=??, y=??, ??=??))
+  sc <- ?? + labs(x="??", y="??")
+  sc + ????
+```

@@ -1,0 +1,203 @@
+---
+title: "Plotting and NHST"
+subtitle: 'Take-home quiz #1'
+author: "The Solution"
+output:
+  pdf_document: default
+---
+```{r echo=FALSE, message= FALSE, results='hide'}
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=TRUE, eval=TRUE, 
+                      fig.align = 'center')
+if (!require("pacman")) install.packages("pacman")
+#if (!require("devtools")) install.packages("devtools")
+
+```
+
+# Getting started 
+
+## Identify and prepare data
+
+\textsf{\texttt{ToothGrowth} is the correct dataset for this assignment. }
+
+```{r }
+data(ToothGrowth)
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+str(ToothGrowth)  
+```
+
+## Load required packages 
+
+```{r }
+pacman::p_load(multcomp, tidyverse, gvlma, xtable) 
+  # Load xtable instead of pander to support cross-referencing. 
+  # It is only available for knitting to .pdf.
+  # pander is a good option when knitting to Word.
+# Load custom function table_glht() from 
+# https://gist.github.com/ajpelu/194e721077ec045a2b864088908e7aca
+source("https://gist.githubusercontent.com/ajpelu/194e721077ec045a2b864088908e7aca/raw/e8002861fd1b99d8e669f5ec461f42348146b729/table_glht.r")
+```
+
+
+# Distribution of response variable
+
+## Plot
+
+```{r out.width='60%', fig.cap="Histogram and density of \\texttt{len} in the \\texttt{ToothGrowth} dataset. \\label{dist}"}
+ToothGrowth %>%
+  ggplot(aes(x=len)) + theme_bw(16) + 
+      geom_histogram(aes(y=..density..),      
+                     binwidth=2,
+                     colour="black", 
+                     fill="lightgreen") +
+      geom_density(alpha=.2, fill="#FF6666") +  
+      xlim(c(-5, 45))
+```
+
+## Data model
+
+* \textsf{A Probability Density Function describes the range of all possible values of a variable, and gives the likelihood of each value occuring in a randomly-drawn sample. The area below the PDF and above the X axis integrates to 1, or the sum of all probabilities. When fit to a sample, it represents the theoretical distribution of data in the population from which the sample was drawn.}
+
+* \textsf{Data in Fig. \ref{dist} are best modelled with a normal (Gaussian) distribution.}
+
+```{r out.width='50%', fig.cap="Q-Q plot for variable \\texttt{len} in \\texttt{ToothGrowth} dataset. \\label{QQ}"}
+ qqnorm(ToothGrowth$len, cex=1.5, pch=1, las=1,
+        xlab = "Theoretical Quantiles", 
+        ylab = "Sample Quantiles")
+ qqline(ToothGrowth$len, distribution = qnorm,
+        probs = c(0.025, 0.975), col="blue", lwd=3) 
+
+```
+
+\clearpage 
+
+# Data visualization 
+
+```{r out.width='60%', fig.cap="Boxplot of \\texttt{len} against \\texttt{dose} conditioned by \\texttt{supp} from \\texttt{ToothGrowth}. \\label{boxplot} "}
+ToothGrowth %>%
+  mutate(supp = plyr::revalue(as.character(supp), 
+                                c("OJ"="Orange juice", 
+                                  "VC"="Ascorbic acid"))) %>%
+ggplot(aes(x=dose, y=len)) + theme_bw(16) +
+ geom_boxplot(aes(fill=supp)) +
+ labs(y="Odontoblast length", 
+      x="Dose (mg/day)") +
+  scale_fill_discrete(name="Supplement Type") +
+  scale_y_continuous(breaks=c(5,10, 20, 30, 35)) 
+```
+
+# Model fitting
+
+## Which statistical model?
+
+* \textsf{As these data are a continuous variable fit against two categorical variables, an ANOVA is most appropriate.}
+
+* \textsf{$H_{0}$: Odontoblast length is unaffected by either supplement at any level of dosage. \\ 
+$H_{1}$: Odontoblast length increases as supplement dosage increases. }
+
+### Run a test
+
+
+```{r results='asis'}
+lm(len ~ dose + supp, ToothGrowth) %>%
+  anova( )%>%
+    xtable(caption="ANOVA results testing the fit of len against dose + supp.", 
+         label = "tab:anova" ) %>%
+      print(comment=FALSE)
+```
+
+
+### Post-hoc model validation 
+
+```{r results='hide'}
+mod.sum <-summary(gvlma(len ~ dose + supp, ToothGrowth) ) 
+```
+
+```{r results='asis'}
+xtable(mod.sum, caption="The ANOVA model meets the necessary assumptions.",
+       label="tab:gvlma") %>%
+  print(comment=FALSE)
+```
+
+
+
+### Post-hoc comparisons
+
+```{r results='asis'}
+lm(len ~ dose + supp, ToothGrowth) %>%
+  glht(., linfct = mcp(dose = "Tukey")) %>%
+    summary( ) %>%
+      table_glht( ) %>%
+    xtable(caption="Results of Tukey post-hoc pairwise comparison on dose.", 
+           label="tab:glht")   %>%
+      print(comment=FALSE)
+```
+
+
+### Conclusions 
+
+\textsf{ANOVA confirms that both supplement type and daily dosage have significant effects on odontoblast length (Table \ref{tab:anova}). Pair-wise poc-hoc comparisons indicate that each of the three dosage levels are different from each other (Table \ref{tab:glht}). These results provide evidence to accept $H_{1}$ over $H_{0}$.}
+
+
+## Another statistical test?
+
+### Additional data visualization
+
+```{r out.width='70%', fig.cap="\\label{ints}"}
+ToothGrowth %>%
+  group_by(supp, dose) %>% 
+     summarize(mean=mean(len), 
+               se=sd(len)/sqrt(length(len)) ) %>%
+ggplot(aes(x=supp, y=mean, 
+           color=dose, 
+           shape=dose)) + 
+           theme_bw(16) +
+              labs(x="Supplement type", 
+                   y="Odontoblast length") +
+              scale_shape_discrete(name="Daily dose (mg)") +
+              scale_color_discrete(name="Daily dose (mg)")+
+  geom_line(aes(group=dose), 
+            linetype= "dotted", 
+                size=2, alpha=0.45) + 
+ geom_errorbar(aes(ymax=mean+se, 
+                   ymin=mean-se), 
+               width=0.1, size=1.25) + 
+ geom_point(size=4) + 
+  scale_y_continuous(breaks=c(5,15,30)) +
+  coord_cartesian(ylim = c(5,30))
+```
+
+\textsf{Fig. \ref{ints} connects the mean response of each dosage by supplement, and highlights disparities between the supplements at each dose. The slopes of the three lines are not consistent, but nor do they cross within the bound of the data plotted, which suggests the ANOVA model should be updated to test for a significant ordinal interaction.}
+
+```{r results='asis'}
+lm(len ~ dose + supp + dose:supp, ToothGrowth) %>%
+  anova() %>%
+    xtable(caption = "Updated ANOVA model testing for interaction.", 
+           label = "intmod") %>%
+      print(comment=FALSE)
+```
+
+
+```{r results='hide'}
+mod.sum2 <-summary(gvlma(len ~ dose + supp + dose:supp, ToothGrowth) ) 
+```
+
+```{r results='asis'}
+xtable(mod.sum2, caption="The updated ANOVA model also meets the necessary assumptions.",
+       label="tab:gvlma2") %>%
+  print(comment=FALSE)
+```
+
+
+```{r results='asis'}
+lm(len ~ dose + supp + dose:supp, ToothGrowth) %>%
+  glht(., linfct = mcp(dose = "Tukey")) %>%
+    summary( ) %>%
+      table_glht( ) %>%
+    xtable(caption="Results of Tukey post-hoc pairwise comparison on dose in the ANOVA 
+           model testing for an interaction between dose and supp.", 
+           label="tab:glht2")   %>%
+      print(comment=FALSE)
+```
+
+\textsf{There is a signficant interaction between dosage level and supplement type (\emph{F} = 4.12, \emph{P} = 0.02). However, because the interaction appears ordinal (Fig. \ref{ints}), we can still make claims about the main effects in the model. Specifically, greater dosages of both supplement types increase odontoblast length, although orange juice is more effective at low and moderate dosages. At 2 mg/day, there is no difference between the supplement types. Furthermore, in the presence of the significant interaction, the two highest dosages are no longer significantly different from each other in the pairwise comparison (\emph{t} = 2.1, \emph{P} = 0.11; Table \ref{tab:glht2}).  }

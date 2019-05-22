@@ -1,0 +1,132 @@
+---
+title: "Plotting and NHST"
+student:
+  name: 
+subtitle: 'Take-home quiz #1'
+output:
+  word_document: default
+---
+```{r echo=FALSE, results='hide'}
+# Code Chunk 1
+knitr::opts_chunk$set(message = FALSE, warning=FALSE)
+```
+```{r echo=TRUE, results='hide'}
+# Code Chunk 2
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(s20x)
+```
+
+
+# Getting started 
+
+## Identify and prepare data
+
+```{r echo=TRUE, eval=TRUE}
+##
+## Un-comment the dataset you want to use: 
+##
+  # data("attitude")
+  # data("ToothGrowth")
+  # data("mtcars")
+```
+
+## Load required packages 
+
+```{r echo=TRUE}
+pacman::p_load( )
+
+```
+
+
+# Distribution of response variable
+
+## Plot
+
+```{r echo=TRUE}
+# Plot data distribution in a way that allows you 
+# to evaluate which data model might fit best.
+
+```
+
+## Data model
+
+* What is a Probability Distribution Function (PDF)?
+* Which PDF seems appropriate for these data?
+
+How well do the data fit the PDF you selected? Provide a graph here: 
+
+```{r echo=TRUE}
+# Plot data distribution in a way that allows you 
+# to determine if data fit model assumptions.
+
+
+```
+
+# Data visualization 
+
+```{r echo=TRUE, fig.width=6}
+# Boxplot script here:
+
+
+
+```
+
+# Model fitting
+
+## Which statistical model?
+
+**Text answers:** 
+
+* Which general statistical approach (type of test) might you apply to these data? 
+* State a null and alternative hypothesis. 
+
+### Run a test
+
+
+```{r echo=TRUE}
+# Provide script for statistical test here
+
+```
+
+### Post-hoc model validation 
+
+
+```{r echo=TRUE}
+# Provide script for post-hoc model validation here
+
+```
+
+### Post-hoc comparisons
+
+```{r echo=TRUE}
+# Provide script for post-hoc group comparison here
+
+```
+
+### Conclusions 
+
+**Text answer:** 
+
+Briefly describe the relationship between the variables in your dataset based on the results of the statistical test(s) conducted so far.
+
+## Another statistical test?
+
+### Additional data visualiation
+
+```{r echo=TRUE}
+# Means, SE, and line graph here
+
+```
+
+**Text answers:** 
+
+* What does the graph signify?
+* What changes, if any, does the graph prompt you to make to your statistical model? 
+
+Depending on your second answer, as necessary: 
+
+* Fit and present a new statistical model 
+* Conduct and summarize a post-hoc test of model assumptions 
+* Conduct post-hoc group comparisons, if needed. 
+
+Finally, provide an updated conclusion about these data. 

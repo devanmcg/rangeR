@@ -1,0 +1,117 @@
+---
+title: "Cluster analysis"
+output: word_document
+date: "Put you name and assignment due date here"
+---
+
+```{r eval=FALSE, message=FALSE, echo=FALSE}
+# Code Chunk 1
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=TRUE, eval=TRUE)
+if (!require("pacman")) install.packages("pacman")
+```
+
+```{r }
+# Code Chunk 2
+
+pacman::p_load(?)
+```
+
+# Data preparation, identification
+
+
+```{r }
+# Remember: Can't use setwd() in Rmd, you need the
+# full file path.
+
+```
+
+# Analysis 
+
+## Univariate relationships
+
+
+```{r results='hide', fig=TRUE}
+# Scatterplot matrix
+
+```
+
+## Distance matrix
+
+
+```{r results='hide'}
+# Distance matrix
+
+```
+
+# Cluster analysis
+
+## Cluster diagram
+
+
+```{r }
+# Cluster analysis
+# Calculate cluster diagram
+
+
+```
+
+__Text answers:__
+
+
+
+## Visualize clusters
+
+```{r fig.cap='Two clusters'}
+# Two clusters
+
+
+```
+
+```{r fig.cap='Three clusters'}
+# Three clusters
+
+```
+
+
+__Text answers:__
+
+
+
+## k-means clustering
+
+### Determine best number of clusters 
+
+```{r results='hide', fig=TRUE}
+# Define cluster range
+    
+# Create empty data.frame 
+
+# K-means clustering across range of # clusters
+
+      
+# new data.frame with categorical variables + groups
+
+# plot change in Sum of Squares against # of clusters
+
+
+```
+
+__Text answers:__
+
+
+
+### Test clusters 
+
+__Text answers:__
+
+
+
+```{r results='verbatim'}
+# Contingency table, mosaic plot, and chisquared test
+
+```
+
+## Bonus round
+
+ 

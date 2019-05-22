@@ -1,0 +1,142 @@
+---
+title: "Analysis of Ecosystems homework week 5"
+subtitle: "Intro to statistical inference"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+author: "Your name here"
+output: word_document
+---
+
+```{r setup, echo=FALSE, results='hide'}
+# Don't mess with this chunk
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=TRUE, eval=TRUE)
+```
+
+```{r packages, results='hide'}
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(s20x, plyr, ggplot2, car, gvlma)
+```
+
+
+# Data preparation 
+
+```{r chunk3_prep, results='verbatim'}
+# Add columns
+# mpg$auto.trans <- with(mpg, ifelse((substring(trans,1,4)=='auto'),1, 0))
+mpg$origin <- as.factor(revalue(mpg$manufacturer, 
+                                c("audi"="Foreign","chevrolet"="USA",
+                                  "dodge"="USA", "ford"="USA","jeep"="USA", 
+                                  "honda"="Foreign", "hyundai"="Foreign",
+                                  "land rover"="Foreign","subaru"="Foreign", 
+                                  "lincoln"="USA", "mercury"="USA", 
+                                  "nissan"="Foreign", "pontiac"="USA", 
+                                  "toyota"="Foreign","volkswagen"="Foreign"))) 
+str(mpg)
+```
+
+
+# The t test
+
+## Assumptions
+
+
+
+## Distribution 
+
+### Graphing
+
+
+
+```{r chunk4, results='verbatim', fig=TRUE}
+
+
+
+
+
+```
+
+
+### Interpretation
+
+
+
+## Variance
+
+### Test
+
+```{r results='verbatim'}
+Variance assessment. Add additional code chunks as necessary
+
+
+
+```
+
+
+### Interpretation
+
+
+# The linear model
+
+## Assumptions
+
+
+
+## Distribution 
+
+### Graphing
+
+
+
+```{r results='verbatim', fig=TRUE}
+Distribution assessment. Add additional code chunks as necessary.
+
+
+
+   
+```
+
+
+### Interpretation
+
+
+
+## Fit a linear model
+
+### Test
+
+```{r results='verbatim'}
+Define a linear model
+
+
+
+```
+
+### Plot
+
+```{r results='verbatim', fig=TRUE}
+Graph two continuous variables and fit a regression line
+
+
+
+
+```
+
+## Evaluate the linear model
+
+### Model fit
+
+```{r results='verbatim', fig=TRUE}
+Q-Q Plot of residuals and test of model assumptions
+
+
+```
+
+ 
+
+### Model results
+
+
+
+### Interpretation
+
+

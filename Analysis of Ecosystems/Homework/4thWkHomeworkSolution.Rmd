@@ -1,0 +1,159 @@
+---
+title: "Analysis of Ecosystems homework week 4"
+subtitle: "Distributions"
+author: "The solution"
+output:
+  pdf_document: default
+---
+
+```{r setup, echo=FALSE, message = FALSE, results='hide'}
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=TRUE, results='hide')
+if (!require("pacman")) install.packages("pacman")
+```
+
+```{r packages}
+# Load just these packages, as per the template
+pacman::p_load(s20x, plyr, ggplot2)
+```
+
+# Data preparation 
+
+```{r chunk3, echo=FALSE, results='verbatim'}
+str(mpg)
+```
+
+# Continuous data 
+
+## Distribution 
+
+### Make a graph
+
+```{r chunk4, echo=TRUE, results='verbatim', fig.cap="Histogram and density plot for city fuel economy. \\label{normhist}", fig.width=3.5, fig.height=3.25}
+( hp.gg <- 
+    ggplot(mpg, aes(x=cty)) + theme_bw() + 
+    geom_histogram(aes(y=..density..),      
+                   binwidth=1,
+                   colour="black", fill="lightgreen") +
+    geom_density(alpha=.2, fill="#FF6666") +
+    xlab("City fuel economy (mpg)") )
+```
+
+\clearpage 
+
+### Interpret the graph
+
+\begin{itemize}
+\item  \textsf{The histogram (Fig. \ref{normhist}) represents the number of times each value on the X axis occurs in the dataset. It is interpeted as raw data (counts).} 
+
+\item  \textsf{The density estimate interpolates between the actual data to estimate the general shape of the sample data's distribution. It is interpreted as an estimation of the sample's distribution. }
+
+\item  \textsf{These data are all positive, and slightly right-skewed (longer right tail).}
+\end{itemize}
+
+## Probability Density Function
+
+### Add PDF curve to the graph
+
+```{r chunk5, echo=TRUE, results='verbatim', fig.cap="Histogram and density plot for city fuel economy with normal Probability Density Function. \\label{normPDF} ", fig.width=3.5, fig.height=3.25}
+hp.gg + stat_function(data=mpg, 
+                        fun = dnorm, 
+                        args=list(mean=mean(mpg$cty),   
+                                    sd=sd(mpg$cty)),    
+                        colour="blue", size=1.1)
+
+```
+
+### Interpret the graph
+
+\begin{itemize}
+\item  \textsf{The new curve (Fig. \ref{normPDF}) represents the theoretical normal distribution based on the moments (mean and sd) from the sample data. It can be interpreted as the shape of the population's distribution from which these samples came, and is thus the distribution a statistical model that assumes a normal distribution will use. } 
+
+\item  \textsf{The normal distribution does not fit the data well. The tail on the right forces the symmetrical normal distribution to assume the population has many more low values that do not occur in the sample. }
+
+\end{itemize}
+
+
+## Graph a different continuous distribution 
+
+\textsf{Symmetry could be improved by log-transforming the data.}
+
+### Transformation graph
+
+```{r chunk6, echo=TRUE, results='verbatim', fig.cap="Histogram, density, and PDF of city fuel economy on a log scale. \\label{log}", fig.height=3.25, fig.width=3.5}
+   logmean <- mean(log(mpg$cty)) 
+   logsd   <- sd(log(mpg$cty)) 
+  ggplot(mpg, aes(x=log(cty))) + theme_bw() + 
+    geom_histogram(aes(y=..density..),      
+                   binwidth=0.1,
+                   colour="black", fill="lightgreen") +
+    geom_density(alpha=.2, fill="#FF6666") +
+    xlab("City fuel economy (log(mpg))") + 
+    stat_function(data=mpg, 
+                  fun = dnorm, 
+                  args=list(mean=logmean,   
+                            sd=logsd),    
+                  colour="blue", size=1.1)
+
+```
+
+### Interpretation 
+
+\textsf{The log transformation increased the symmetry of the \texttt{cty} variable (Fig. \ref{log}). Now the data better meet the assumptions of models like ANOVA that assume data have a normal distribution. }
+
+# Discrete data
+
+## Distribution 
+
+```{r chunk7, echo=TRUE, results='verbatim'}
+
+class.ct <- count(mpg, vars="class") # New d.f. of counts/group
+colnames(class.ct)[[2]] <- "count"
+class.ct$freq <- round(with(class.ct, # create a frequency column
+                            count/sum(count)), 3) 
+class.ct <- class.ct[with(class.ct, order(-freq)), ] # Re-order by freq
+str(class.ct)
+
+```
+
+### Make a bar graph
+
+```{r chunk8, echo=TRUE, results='verbatim', fig.cap="Number (counts) of vehicles by class. \\label{counts} ",fig.width=3.5, fig.height=3.25}
+ggplot(class.ct, aes(x=reorder(class,-count, max), y=count)) +
+  geom_bar(stat="identity",
+           colour="black", fill="lightgreen") +
+  labs(x="Vehicle class", 
+       y="NUmber of vehicles") +
+  theme_bw(12) +
+  theme(axis.text.x = element_text(color="black", angle=45, hjust = 1))
+ 
+```
+
+### Add PMF
+
+```{r chunk9, echo=TRUE, results='verbatim', fig.cap="Relative frequency of vehicles by class, with negative binomial PMF. When the \\texttt{prob=} argument is used in \\texttt{dnbinom}, try \\texttt{size=1} first, since 1.0 represents the sum of all probabilities. \\label{PMF} ",fig.width=3.5, fig.height=3.25}
+  ggplot(class.ct, aes(x=reorder(class,-freq, max), y=freq)) +
+  geom_bar(stat="identity",
+           colour="black", fill="#feb24c") +
+  labs(x="Vehicle class", 
+       y="Proportion of all vehicles") +
+  theme_bw(12) +
+  theme(axis.text.x = element_text(color="black", angle=45, hjust = 1)) + 
+  geom_point(data=transform(data.frame(x=1:7), 
+                                    y=dnbinom(1:7, size=1, 
+                                      prob=class.ct$freq)), 
+                           aes(x, y), 
+                           stat="identity", 
+                           color="#2b8cbe", size=3) 
+```
+
+### Interpret the graph
+
+\begin{itemize}
+\item  \textsf{The PMF (Fig. \ref{PMF}) is similar to the PDF (Fig. \ref{normPDF}) in that it represents the theoretical distribution of these data\textemdash i.e., the probability that a given category would be selected from a random draw of the population from which these data were sampled. A difference is that it is applied to discrete data, so instead of a continuous line under which all probabilities sum to 1.0, the PMF is plotted as discrete probabilities for each category based on their relative frequency in the sample set. } 
+
+\item  \textsf{Random draws on a negative binomial distribution fit with the above parameters would likely draw SUVs most frequently and two-seater cars least frequently, as these are the relative values given by the PMF. }
+
+\end{itemize}
+
+

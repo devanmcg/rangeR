@@ -1,0 +1,173 @@
+---
+title: "Cluster analysis"
+subtitle: "Homework Week 9"
+author: "The Solution"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output: pdf_document
+header-includes:
+  - \usepackage{subfig}
+---
+
+```{r eval=TRUE, message=FALSE, echo=FALSE}
+# Code Chunk 1
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=TRUE, eval=TRUE, 
+                      fig.align = 'center')
+if (!require("pacman")) install.packages("pacman")
+```
+
+```{r }
+pacman::p_load(tidyverse, GGally, vegan)
+```
+
+# Data preparation, identification
+
+
+```{r }
+ load("C:/Users/Devan.McGranahan/GoogleDrive/Teaching/Classes/Analysis of Ecosystems/compiled notes/AoE course materials/example datasets/mtcars2.Rdata")
+str(mtcars2)
+```
+
+# Analysis 
+
+## Univariate relationships
+
+
+```{r fig.cap="Scatterplot matrix of continuous variables in \\texttt{mtcars2} dataset. \\label{SPM}"}
+mtcars2 %>%
+  select(., .data$disp :.data$mpg ) %>%
+      ggpairs() + theme_bw()
+```
+
+## Distance matrix
+
+
+```{r }
+car.em <- 
+  mtcars2 %>%
+    select(., .data$disp :.data$mpg ) %>%
+      vegdist(., method = "euc")
+
+# Maximum distance
+  max(car.em)
+# Some R matrix work will show us which pair is the maximum:
+  car.m <- as.matrix(car.em) 
+  colnames(car.m) <- mtcars2$make.model
+  rownames(car.m) <- mtcars2$make.model
+  car.m[car.m == 0] <- 1 # Replace zeros in diagonal
+# Find maximum pair
+  which(car.m == max(car.m), arr.ind = TRUE) %>%
+    row.names()
+```
+
+# Cluster analysis
+
+## Cluster diagram
+
+
+```{r fig.height=8, fig.cap="Cluster diagram of the \\texttt{mtcars2} dataset based on the Euclidean distance measure. \\label{clustd}"}
+car.clust <- hclust(car.em, method="average") 
+car.clust$labels <- mtcars2$make.model
+par(mar=c(5,5,0,10)) 
+plot(as.dendrogram(car.clust), 
+     horiz=TRUE,  
+     xlab="Make and model", 
+     ylab="Euclidean distance", las=1)
+```
+
+\begin{itemize}
+\item Which three cars are the most similar, based on these data? How do you know, and what might account for their similarity?
+\item[] \textsf{The three Mercedes 450s are very similar to each other, with very low branches representing minimal Euclidean distance (Fig. \ref{clustd}). Their similarity is likely due to the fact that they are different trim packages of the same make and model. \\}
+
+\item Which car or cars are the most unique? How do you know?
+\item[] \textsf{The Toyota Corolla and the Cadillac Fleetwood are the most unique \emph{pair}, as they have the maximum Euclidean distance (425.3). \\ 
+There's also an argument for the Maserati Bora being the most unique individual car, as it has a high-level branch all to itself and the only relationship it really has with the other cars is that it is simply in the dataset. The clustering analysis couldn't group it with any other car or cars. \\ }
+
+\item Which car is more similar to the Toyota Corolla: the Porsche 914-2, or the Duster 360? How do you know?
+\item[] \textsf{The Porsche 914-2 is more similar to the Toyota Corolla, as they share the same high-level  cluster (Fig. \ref{clustd}). \\}
+\end{itemize}
+
+
+## Visualize clusters
+
+```{r fig-sub, fig.cap='Groups formed by k=2 and k=3 clusters. \\label{clust2}', fig.subcap=c('Groups formed with k=2 clusters.', 'Groups formed with k=3 clusters.'), out.width='.6\\linewidth', fig.asp=1, fig.ncol = 1}
+par(mar=c(1,5,0,0)) 
+plot(car.clust, labels=mtcars2$make.model,
+         main=" ", 
+       xlab="Make and model", 
+       ylab="Euclidean distance", las=1)
+  rect.hclust(car.clust, 2, border="red") 
+par(mar=c(1,5,0,0)) 
+plot(car.clust, labels=mtcars2$make.model, 
+       main=" ", 
+       xlab="Make and model", 
+       ylab="Euclidean distance", las=1)
+  rect.hclust(car.clust, 3, border="blue")
+```
+
+
+
+\begin{itemize}
+\item At which Euclidean distance do the two-group and three-group clustering scenarios cut the tree?
+\item[] \textsf{k=2 cuts the tree at 200, while k=3 cuts at 150. \\}
+
+\item How many clusters would be formed if one were to cut the tree at 150?
+\item[] \textsf{As stated above, 3. But in the spirit of the question, say one cut the tree at \emph{125}, there would be 4 groups. \\}
+\end{itemize}
+
+## k-means clustering
+
+### Determine best number of clusters 
+
+```{r results='hide', fig.cap="Results of k-means clustering showing the lowest residual sums of squares in the two-cluster solution. \\label{kmeans}", fig.width=4}
+try.clusters <- 1:8
+    
+k.groups <- data.frame(matrix(
+  ncol=length(try.clusters), 
+  nrow=length(mtcars2$make.model)))
+colnames(k.groups) <- paste0("clstrs",
+                             c(try.clusters))
+    
+k.ss <-data.frame(matrix(nrow=length(try.clusters), ncol=2))
+colnames(k.ss) <- c("clusters",
+                    "diff.SumSquares")
+
+for(i in 1:length(try.clusters)) {
+  cl <- kmeans(car.em, i)
+  k.groups[i] <- cl$cluster
+  k.ss[i,] <- cbind(i, with(cl, totss-betweenss))}
+
+plot(diff.SumSquares ~ clusters, k.ss, type="b")
+```
+
+    
+### Test clusters 
+
+```{r fig.cap="Mosaic plot showing proportion of each car cluster of USA or foreign origin.", fig.width=4}
+car.clusts <- data.frame(select(mtcars2, .data$make.model :.data$cyl), 
+                             k.groups)
+
+tabOR <- with(car.clusts, table(clstrs2, origin)) 
+plot(tabOR, main=" ")
+summary(tabOR) %>%
+  pander::pander("Chi square test on association between 
+                 car origin and two-cluster solution.")
+
+```
+
+\textsf{Based on these results, we can say there is a significant difference between the two clusters in terms of their origins: one cluster is primarily domestic, US automobiles, while the other is predominantly foreign.}
+
+
+## Bonus round
+
+\textsf{The Toyota Corona and Porsche 914 are not very similar cars (Fig. \ref{cars}).\\}
+
+```{r fig.cap='Even when they are the same color they do not look much alike. \\label{cars}', fig.subcap=c('A 1973 Toyota Corona.', 'A 1973 Porsche 914.'), out.width='0.49\\linewidth', fig.asp=1, fig.ncol = 2}
+
+
+knitr::include_graphics(c('1973ToyotaCorona', '1973Porsche914'))
+
+```
+
+
+ 

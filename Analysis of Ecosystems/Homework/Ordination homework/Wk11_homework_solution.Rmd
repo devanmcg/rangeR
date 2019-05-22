@@ -1,0 +1,157 @@
+---
+title: "Ecological ordination"
+subtitle: "Homework Week 11"
+author: "The Solution"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output: pdf_document
+header-includes:
+  - \usepackage{subfig}
+  - \usepackage{multirow}
+---
+
+```{r setup, eval=TRUE, echo=FALSE, message=FALSE, echo=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=FALSE, eval=TRUE, fig.align = 'center')
+if (!require("pacman")) install.packages("pacman")
+source('https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomGGplotThemes.R')
+source("https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomCommunityFunctions.R")
+pacman::p_load(vegan, tidyverse, broom, ggordiplots, RVAideMemoire, xtable )
+```
+
+
+```{r data}
+ waders <- read_csv("C:/Users/Devan.McGranahan/GoogleDrive/Teaching/Classes/Analysis of Ecosystems/compiled notes/AoE course materials/rangeR/example datasets/wader_data.csv")
+```
+
+```{r unconstrained_ordination, results='hide'}
+ wader.comm <- waders %>%
+    select(., .data$Oystercatcher :.data$BlackWinged.Stilt )
+  wader.mds <- capscale(wader.comm ~ 1, distance="bray", metaMDSdist=TRUE, 
+                           engine=monoMDS, autotransform=TRUE) 
+
+```
+
+Which function/distance measure did you choose, and why?
+
+\textsf{This ordination was fit with the \texttt{capscale} function using the Bray-Curtis distance measure and the \texttt{metaMDS} options because this fit these data best and had the maximal variance explained in the top two axes. \\}
+
+How can you be confident your ordination is a decent representation of variation in these data? 
+
+\textsf{More than 70\% of variation is explained by the first two axes (Table \ref{VarView}), after which further inertia is marginal (Fig. \ref{scree}). \\}
+
+
+```{r assessment, results='asis'}
+var.view(wader.mds, 5) %>%
+  xtable("Proportion variance explained by the first five axes of the MDS.", label="VarView") %>%
+          print(comment=FALSE, include.rownames=TRUE)
+```
+
+```{r screeplot, results='hide', fig.cap='Screeplot for the Bray-Curtis MDS on the wader data. \\label{scree}', fig.width=7, fig.height=3}
+
+enframe(wader.mds$CA$eig) %>%
+  plyr::rename(c("value"="Inertia")) %>%
+    slice(1:9) %>%
+ggplot() + theme_bw(14) + 
+  geom_line(aes(x=name, y=Inertia, group=1), 
+            color="darkblue", size=1.5) + 
+  labs(x="Axis")
+```
+
+
+Which categorical variable(s) show the most difference in the bird communities? Which show the least? Provide evidence/examples.
+
+\textsf{As the only factor with \emph{P} > 0.10, Location provides the least explanation of difference in the bird communities, while Habitat is the best (Table \ref{fit}). \\}
+
+```{r envfit, results='asis'}
+w.fit <- envfit(wader.mds ~ Country + Ocean + Location + Habitat, data=waders)$factors
+```
+
+```{r fit_tab, results='asis'}
+tibble(Term=names(w.fit$r), 
+           `R squared`=round(w.fit$r, 2),
+           `P value`=w.fit$pvals) %>%
+      xtable("Results of \\texttt{factorfit} on wader data. ", label="fit") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+```
+
+Which bird species contribute the most to variation among habitat types?
+
+\textsf{ This is a case where a constrained ordination most directly answers the question. Fitting \texttt{Habitat} as a constraint, Whitefronted Plover and Avocet are at the opposite ends of the first (constrained) axis (-0.73 and 0.44, respectively; Table \ref{cap}). \\}
+
+```{r constrained_ordination, results='hide'}
+hab.cap <- capscale(wader.comm ~ waders$Habitat, distance="bray", metaMDSdist=TRUE, 
+                           engine=monoMDS, autotransform=TRUE)
+```
+
+```{r spp_scores, results='asis'}
+scores(hab.cap, display="species") %>%
+            as.data.frame() %>%
+              rownames_to_column("species") %>%
+                select(-MDS1) %>%
+                  arrange(desc(abs(CAP1))) %>%
+        xtable("Species ranked by absolute value of species score along \\texttt{CAP1} in the constrained \\texttt{capscale} model $[y_n] \\sim\\ Habitat$. \\texttt{CAP1} accounts for 75\\% of variance in the data. The constrained model is significantly better than the unconstrained ordination (Table \\ref{comp}). ", label="cap") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+```
+
+```{r comp, results='asis'}
+anova(wader.mds, hab.cap) %>%
+  xtable("Results of statistical comparison of constrained vs. unconstrained models.", label="comp") -> comp
+
+addtorow <- list()
+addtorow$pos <- list(-1)
+addtorow$command <- 
+  paste0(
+  paste0('\\multicolumn{5}{l}{Model 1: wader.comm $\\sim$ 1 } \\\\', collapse=''), 
+  paste0('\\multicolumn{5}{l}{Model 2: wader.comm $\\sim$ Habitat}\\\\ ', collapse=''))
+
+print(comp, add.to.row=addtorow, include.colnames=T, 
+      comment=FALSE, include.rownames=FALSE)
+```
+
+
+
+
+Which bird species seems most abundant along Northern Namibian coastlines?
+
+\textsf{Turnstones are the species most associated with Namibian coastlines (Fig. \ref{ord}).  \\}
+
+```{r MDS, fig.cap='Species scores and site scores plotted by habitat and country (N=Namibia, SA=South Africa). \\label{ord}', fig.width=7, fig.height=4}
+spp.sc <- scores(wader.mds, display="species") %>%
+            as.data.frame() %>%
+              rownames_to_column("species")
+
+site.sc <- scores(wader.mds, display="sites") %>%
+            as.data.frame() %>%
+              mutate(Country = ifelse(waders$Country == "Namibia", "N", "SA"), 
+                     Habitat = waders$Habitat)
+
+  ggplot() + theme_ord(12) +
+  geom_vline(xintercept = 0, lty=3, color="darkgrey") +
+  geom_hline(yintercept = 0, lty=3, color="darkgrey") +
+  labs(x="MDS 1", y="MDS 2") +
+  geom_text(data=filter(spp.sc, abs(MDS1) > 0.3), 
+            aes(x=MDS1*1.0, y=MDS2*1.5, 
+                label=species), 
+            fontface="italic", 
+            check_overlap = TRUE) +
+  geom_text(data=site.sc, aes(x=MDS1, y=MDS2, 
+                               label=Country, 
+                              color=Habitat), 
+            fontface="bold", 
+            check_overlap = TRUE) + 
+  scale_color_manual(name="Habitat", values = cbPal5) 
+```
+
+
+\clearpage 
+
+
+# Appendix
+## Full session script
+```{r ref.label=knitr::all_labels(!label %in% c('fit_tab', 'comp', 'sessionInfo')),echo=TRUE,eval=FALSE}
+```
+
+## Session info
+```{r sessionInfo, echo=FALSE}
+sessionInfo();
+```
