@@ -1,0 +1,15 @@
+Package: rangeR
+Title: Materials for RNG 765 Analysis of Ecosystems
+Version: 0.0.0.9000
+Authors@R: person("Devan", "McGranahan", email = "devan.mcgranahan@gmail.com", role = c("aut", "cre"))
+Description: This package supports Analysis of Ecosystems, my graduate-level course on presentation, analysis, and interpretation of ecological data.
+Depends: R (>= 3.5.0)
+License: CC-BY-4.0
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    dplyr,
+    ggplot2,
+    vegan
+RoxygenNote: 6.1.1
+Roxygen: list(markdown = TRUE)

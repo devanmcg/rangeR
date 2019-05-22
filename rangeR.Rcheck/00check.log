@@ -1,0 +1,66 @@
+* using log directory 'C:/Users/Devan.McGranahan/GoogleDrive/Teaching/Classes/Analysis of Ecosystems/compiled notes/AoE course materials/rangeR/rangeR.Rcheck'
+* using R version 3.5.3 (2019-03-11)
+* using platform: x86_64-w64-mingw32 (64-bit)
+* using session charset: ISO8859-1
+* using options '--no-manual --as-cran'
+* checking for file 'rangeR/DESCRIPTION' ... OK
+* this is package 'rangeR' version '0.0.0.9000'
+* package encoding: UTF-8
+* checking package namespace information ... OK
+* checking package dependencies ... OK
+* checking if this is a source package ... OK
+* checking if there is a namespace ... OK
+* checking for .dll and .exe files ... OK
+* checking for hidden files and directories ... OK
+* checking for portable file names ... OK
+* checking whether package 'rangeR' can be installed ... OK
+* checking package directory ... OK
+* checking DESCRIPTION meta-information ... WARNING
+Non-standard license specification:
+  CC-BY-4.0
+Standardizable: FALSE
+* checking top-level files ... OK
+* checking for left-over files ... OK
+* checking index information ... OK
+* checking package subdirectories ... OK
+* checking R files for non-ASCII characters ... OK
+* checking R files for syntax errors ... OK
+* checking whether the package can be loaded ... OK
+* checking whether the package can be loaded with stated dependencies ... OK
+* checking whether the package can be unloaded cleanly ... OK
+* checking whether the namespace can be loaded with stated dependencies ... OK
+* checking whether the namespace can be unloaded cleanly ... OK
+* checking loading without being on the library search path ... OK
+* checking dependencies in R code ... OK
+* checking S3 generic/method consistency ... OK
+* checking replacement functions ... OK
+* checking foreign function calls ... OK
+* checking R code for possible problems ... NOTE
+RankAbundance: no visible global function definition for 'qt'
+bouncer: no visible binding for global variable 'abundance'
+bouncer: no visible binding for global variable 'propfreq'
+theme_ord: no visible global function definition for '%+replace%'
+theme_ord: no visible global function definition for 'theme_grey'
+theme_ord: no visible global function definition for 'theme'
+theme_ord: no visible global function definition for 'element_text'
+theme_ord: no visible global function definition for 'rel'
+theme_ord: no visible global function definition for 'element_line'
+theme_ord: no visible global function definition for 'element_rect'
+theme_ord: no visible global function definition for 'element_blank'
+theme_ord: no visible global function definition for 'unit'
+var.view: no visible global function definition for 'eigenvals'
+Undefined global functions or variables:
+  %+replace% abundance eigenvals element_blank element_line
+  element_rect element_text propfreq qt rel theme theme_grey unit
+Consider adding
+  importFrom("stats", "qt")
+to your NAMESPACE file.
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+  'RankAbundance' 'bouncer' 'theme_ord' 'var.view'
+All user-level objects in a package should have documentation entries.
+See chapter 'Writing R documentation files' in the 'Writing R
+Extensions' manual.
+* checking examples ... NONE
+* DONE
+Status: 2 WARNINGs, 1 NOTE
