@@ -1,4 +1,10 @@
 .Rproj.user
+.Rproj
 .Rhistory
-.RData
 .Ruserdata
+.gdoc
+.log
+.gsheet
+.httr-oauth
+*.ini
+.jpeg
