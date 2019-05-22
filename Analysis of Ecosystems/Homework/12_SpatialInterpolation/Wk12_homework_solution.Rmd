@@ -1,0 +1,140 @@
+---
+title: "Spatial interpolation"
+subtitle: "Homework Week 12"
+author: "The Solution"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output: pdf_document
+header-includes:
+  - \usepackage{subfig}
+---
+
+```{r setup, eval=TRUE, echo=FALSE, message=FALSE, echo=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=FALSE, eval=TRUE, fig.align = 'center')
+if (!require("pacman")) install.packages("pacman")
+source('https://raw.githubusercontent.com/devanmcg/rangeR/master/R/CustomGGplotThemes.R')
+pacman::p_load(plyr, tidyverse, ggmap, akima, viridis, xtable)
+#pacman::p_load_gh("dkahle/ggmap")
+
+```
+
+
+```{r data}
+#
+# Load windbreak data from github
+#
+D = url("https://github.com/devanmcg/rangeR/blob/master/example%20datasets/windbreak.data.Rdata?raw=true")
+load(D)
+
+wbd <- merge(windbreak.data$windbreak.points, 
+             windbreak.data$windbreak.densities, 
+             by = "id") %>%
+          mutate(change = density.2015 - density.2010)
+#
+# Get North Dakota boundaries
+#
+  NDs <- map_data("state") %>% filter(region =="north dakota")
+  NDc <- map_data("county") %>% filter(region =="north dakota")
+```
+
+
+What is the spatial pattern of change in windbreak density between 2010 and 2015?
+
+\textsf{Windbreak density declined in a few discrete pockets, primarily where North Dakotans would call "east river," east of and, geologically similar but geographically illogical, north of the Missouri River (Fig. \ref{change}). \\}
+
+```{r change_interp, fig.cap="Spatial interpolations of windbreak data fit with \\texttt{akima} package.", fig.subcap=c('Spatial pattern of windbreak removal in North Dakota between 2010 and 2015. \\label{change}', 'Windbreak density across North Dakota as of 2015. \\label{density}'), fig.height=3, fig.ncol = 1}
+#
+# Interpolating change
+#
+ ChangeInterp <-  with(wbd, interp(x=long, y=lat, 
+                                        z=change))
+ChangeInterp.df <- as.data.frame(interp2xyz(ChangeInterp))
+names(ChangeInterp.df) <- c("long", "lat", "change")
+#
+# Plotting change 
+#
+ ggplot()  + coord_map("polyconic") + theme_map() +
+    geom_tile(data=ChangeInterp.df, aes(x=long, y=lat, 
+                                fill=change)) + 
+         geom_path(data=NDc, 
+                aes(x=long, y=lat, group=group), 
+                color="grey60", size=0.5) + 
+      geom_path(data=NDs, 
+                aes(x=long, y=lat, group=group), 
+               color="grey30", size=0.75) +
+    scale_fill_viridis(name="Change in\nwindbreak\ndensity\n2010-2015", 
+                       na.value="transparent", 
+                       direction = -1) 
+#
+# Interpolating density
+#
+DenseInterp <-  with(wbd, interp(x=long, y=lat, 
+                                        z=density.2015))
+DenseInterp.df <- as.data.frame(interp2xyz(DenseInterp))
+names(DenseInterp.df) <- c("long", "lat", "density")
+#
+# Plotting density 
+#
+ ggplot()  + coord_map("polyconic") + theme_map() +
+    geom_tile(data=DenseInterp.df, aes(x=long, y=lat, 
+                                fill=density)) + 
+         geom_path(data=NDc, 
+                aes(x=long, y=lat, group=group), 
+                color="grey60", size=0.5) + 
+      geom_path(data=NDs, 
+                aes(x=long, y=lat, group=group), 
+               color="grey30", size=0.75) +
+    scale_fill_viridis(name="Windbreak\ndensity\n(2015)", 
+                       na.value="transparent", 
+                       direction = 1) 
+
+```
+
+
+What parts of the state, geographically and by ecoregion, have the most windbreaks? Which have the least?
+
+\textsf{Geographically, the eastern part of the state has the most windbreaks, while the southwestern corner has the least (excluding a few localized pockets; Fig. \ref{density}).  \\
+By ecoregion, the Lake Agassiz Plain (basically the Red River Valley) had the highest windbreak density, while the NW Plains had the lowest (Table \ref{densetab}). \\}
+
+```{r ecoregion_density, results='asis'}
+#
+# Ecoregion summary tables
+#
+wbd  %>%
+  group_by(ecoregion) %>%
+    summarize(`mean density` = round(mean(density.2015), 0)) %>%
+      arrange(desc(`mean density`)) %>%
+      xtable("Average density of windbreaks in North Dakota in 2015, by ecoregion.",
+             label="densetab") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+```
+
+Which parts of the state, geographically and by ecoregion, showed the greatest change in windbreak density during the study region? Which showed the least?
+
+\textsf{As shown in Fig. \ref{change}, the eastern part of the state, especially the Red River Valley, had the greatest reductions, while the southwestern part of the state appears unchanged.  \\ 
+By ecoregion, the Lake Agassiz Plain had the greatest reduction, while the NW Great Plains was entirely unchanged between 2010-2015 (Table \ref{changetab}). \\ }
+
+```{r ecoregion_change, results='asis'}
+wbd  %>%
+  group_by(ecoregion) %>%
+    summarize(`mean change` = round(mean(change), 0)) %>%
+      arrange(`mean change`) %>%
+      xtable("Average of change in windbreak density between 2010 and 2015 in North Dakota, by ecoregion.", 
+            label="changetab") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+```
+
+
+
+\clearpage 
+
+
+# Appendix
+## Full session script
+```{r ref.label=knitr::all_labels(!label %in% c('fit_tab', 'comp', 'sessionInfo')),echo=TRUE,eval=FALSE}
+```
+
+## Session info
+```{r sessionInfo, echo=FALSE}
+sessionInfo();
+```

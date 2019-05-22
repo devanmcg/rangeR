@@ -1,0 +1,290 @@
+---
+title: "Week 8: Discrete data and GLM(M) regression"
+author: "The Solution"
+date: '`r format(Sys.Date(), "%d %B %Y")`'
+output: pdf_document
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{hyperref}
+urlcolor: blue
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message = FALSE, results='hide'}
+# Do not mess with this code chunk
+knitr::opts_chunk$set(message = FALSE, warning=FALSE, 
+                      echo=TRUE, eval=TRUE, fig.align = "center")
+if (!require("pacman")) install.packages("pacman")
+
+```
+
+These data and analyses have been published as: 
+\begin{quote}
+Menaker, BE, DA McGranahan, and RD Sheptak Jr. 2019. \href{https://aquila.usm.edu/cgi/viewcontent.cgi?article=1010\&context=jsss}{Game Day Alters Crime Pattern in the Vicinity of Sport Venues in Cleveland, OH} Journal of Sport Safety and Security 4(1) art.1. \\
+\end{quote}
+
+
+
+```{r package_loading}
+pacman::p_load(s20x, tidyverse, lme4, car, multcomp, 
+               AICcmodavg, gridExtra, xtable)
+```
+
+# Data 
+
+## Structure 
+
+```{r data, echo=FALSE}
+clev.d <- read.csv("C:/Users/Devan.McGranahan/GoogleDrive/Teaching/Classes/Analysis of Ecosystems/compiled notes/AoE course materials/rangeR/example datasets/ClevelandCrimeData.csv", 
+                   na.strings = "")
+str(clev.d)
+```
+
+# Compare discrete data with simple variance structure
+
+## Crime by game days and event type
+
+```{r, out.width='100%', fig.pos='h', fig.cap="Crime data around the Quicken Loan Arena/Progessive Field major league sports venues in Cleveland (Gateway Park). LEFT: More charges are filed on game days than non-game days. RIGHT: More charges are filed on days with baseball games than basketball games"}
+gd.gg <-
+  clev.d %>%
+    filter(Venue == "GatewayProgessiveField") %>%
+      ggplot() + theme_bw(20) + 
+        geom_bar(aes(x=GameDay), stat="count", fill="#377eb8")
+et.gg <- 
+    clev.d %>%
+    filter(Venue == "GatewayProgessiveField") %>%
+      tidyr::drop_na(Event) %>%
+        ggplot() + theme_bw(20) + 
+          geom_bar(aes(x=Event), stat="count", fill="#377eb8")
+grid.arrange(gd.gg, et.gg, nrow =1 )
+```
+
+\clearpage 
+
+## Crime by event type
+
+\textsf{Basketball and baseball are played at the Gateway Complex, in the Quicken Loans Arena and Progressive Field, respectively. It appears more charges are filed on days with baseball games than basketball games. There are two options to test this hypothesis: }
+
+\textsf{\textbf{Option 1:} The basic $\chi^2$ route:}
+
+```{r}
+ clev.d %>%
+    filter(Venue == "GatewayProgessiveField") %>%
+      drop_na(Event) %>%
+        xtabs(~ Event, data=. ) %>%
+          chisq.test(.) %>%
+            pander::pander(caption="
+              Results of Chi-squared test showing baseball games 
+              incur significantly greater crime than basketball 
+              games around the Gateway Complex in Cleveland.")
+```
+
+\textsf{\textbf{Option 2:} GLM with Poisson distribution:}
+
+```{r}
+  clev.d %>%
+    filter(Venue == "GatewayProgessiveField") %>%
+      drop_na(Event) %>%
+        group_by(Event) %>%
+          summarize(charges = length(ChargeType)) %>%
+  glm(charges ~ Event, data=., 
+              family=poisson(link = "log")) %>%
+  Anova(.) %>% 
+    pander::pander(caption="
+              Results of GLM showing baseball games incur significantly 
+              greater crime than basketball games around the 
+                           Gateway Complex in Cleveland.")
+
+```
+
+\textsf{In each case, results indicate there are significantly more charges filed on days with baseball games then basketball games. My colleague and I have a couple thoughts on this. One, there are just a lot more baseball games played in a season than basketball games, and some rate like charges/event would be necessary. Also, NBA games are expensive! That's a different clientele than a bunch of bros getting cheap outfield seats and putting down a bunch of stadium beers before hitting the bars after the game and starting fights and committing property damage.}
+
+# Compare discrete data with non-independent variance
+
+What special considerations must we give were we to model data from both venues together?
+
+\textsf{One must use a model sensitive to the fact that data from each venue are not independent. Thus venue should be included as a random effect to ensure variance is not pooled across venues in the model.}
+
+## Data presentation 
+
+
+```{r}
+  clev.d %>%
+    group_by(Venue, GameDay) %>%
+      summarize(charges = length(ChargeType)) %>%
+        knitr::kable(caption="Counts of total charges at two major league sports venues 
+                     in Cleveland on game days and non-game days.")
+
+```
+
+
+```{r out.width='75%', fig.height=7, fig.cap="Total charges filed on game days and non-game days at both major league sports venues in Cleveland."}
+ clev.d %>%
+      ggplot() + theme_bw(20) + 
+        geom_bar(aes(x=GameDay, fill=Venue), stat="count") +
+  theme(legend.position = "top", 
+        legend.direction = "vertical")
+```
+
+## Statistical testing and interpretation
+
+* \textsf{It is important that our model include Venue as a random effect and use a discrete distribution to account for the count data.}
+* \textsf{A \texttt{glmer} with a Poisson distribution is appropriate for these data.} \\
+
+
+```{r}
+mod.dat <-   
+  clev.d %>%
+    group_by(Venue, GameDay) %>%
+      summarize(charges = length(ChargeType))
+
+  NullMod <- glmer(charges ~ 1 + (1|Venue), mod.dat, 
+                  family=poisson(link = "log"))
+  GameDay <- glmer(charges ~ GameDay + (1|Venue), mod.dat, 
+              family=poisson(link = "log"))
+  anova(NullMod, GameDay) %>% 
+    pander::pander(caption="Across both major leage sports venues in Cleveland, more 
+                   charges are filed on game days than non-game days.")
+```
+
+# Going further 
+
+* \textsf{The number of charges does vary with charge type ($\chi^2$ = 167, \emph{P} < 0.001). } 
+
+* \textsf{One might need to use another distribution but the Poisson continues to work well for these data. \\} 
+
+```{r out.width='100%', fig.height=6, fig.cap= "Frequency of charges by charge type and whether they occurred on a game day or not."}
+  clev.d %>%
+    group_by(ChargeType, GameDay) %>%
+    summarize(ChargeCount = length(ChargeType) )  %>%
+    ggplot() + theme_bw(16) + 
+    geom_bar(aes(x=reorder(ChargeType, -ChargeCount, sum),
+                 y=ChargeCount, fill=GameDay), stat="identity") +
+    labs(x="Charge type", 
+         y=" Number of charges filed") +
+    theme(axis.text.x = element_text(angle=45, hjust=1),
+          panel.grid.major.x = element_blank())
+```
+
+```{r, results='asis'}
+type.d <-
+  clev.d %>%
+    group_by(Venue, ChargeType, GameDay) %>%
+    summarize(ChargeCount = length(ChargeType) )
+
+type.glm <- glmer(ChargeCount ~ ChargeType + (1|Venue), type.d, 
+              family=poisson(link = "log"))
+Anova(type.glm) %>% 
+  xtable(caption="Statistical evidence that the number of charges varies
+         with charge type.") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+```
+
+\textsf{When focusing on just the three most-reported charge types:}
+
+* \textsf{There are significant differences between the number of charges per type. In post-hoc pairwise comparisons, Violent crimes were more frequent than both property damage and resisting arrest (\emph{P} < 0.001 for each), but a trend towards fewer charges for resisting arrest than property damage was not statistically significant (\emph{P} = 0.19).} 
+
+* \textsf{$AIC_c$-based model selection (Table \ref{tabCIs}) indicated that game day had an increasing effect on the number of charges for the three most-frequent charge types (95\% CI: 0.54\textendash 1.23).}
+
+* \textsf{Charges for violent crimes were the most frequent, while rates for resisting arrest and property damage were substantially aobve zero but not different from each other (Fig. \ref{CIs}). \\}
+
+```{r, results='asis'}
+Top3.d <-
+  clev.d %>%
+   filter(ChargeType %in% c("VIOLENT",
+                            "PROPERTY",
+                            "RESISTING ARREST")) %>%
+    group_by(Venue, ChargeType, GameDay) %>%
+    summarize(ChargeCount = length(ChargeType) )
+
+type2.glm <- glmer(ChargeCount ~ ChargeType + (1|Venue), Top3.d, 
+              family=poisson(link = "log"))
+
+glht.res <- cbind(round(summary(glht(type2.glm, 
+                        linfct=mcp(ChargeType ="Tukey")))$test$coefficients,2), 
+                  round(summary(glht(type2.glm, 
+                        linfct=mcp(ChargeType ="Tukey")))$test$pvalues,2))
+colnames(glht.res) <- c( "Coefficient", "P-value")
+xtable(glht.res, caption="Results of post-hoc pairwise comparison of the
+       top three most-reported charge types.") %>%
+          print(comment=FALSE) #, include.rownames=FALSE)
+``` 
+
+```{r, results='asis'}
+  type2.null <- glmer(ChargeCount ~ 1 + (1|Venue), Top3.d, 
+                     family=poisson(link = "log"))
+  type2.gd<- glmer(ChargeCount ~ GameDay + (1|Venue), Top3.d, 
+                    family=poisson(link = "log"))
+  type2.ct<- glmer(ChargeCount ~ ChargeType + (1|Venue), Top3.d, 
+                    family=poisson(link = "log"))
+  type2.add<- glmer(ChargeCount ~ ChargeType + GameDay + (1|Venue), Top3.d, 
+                     family=poisson(link = "log"))
+  type2.int<- glmer(ChargeCount ~ GameDay * ChargeType + (1|Venue), Top3.d, 
+                    family=poisson(link = "log"))
+
+  cand.mod.names <- c("type2.null", "type2.gd", "type2.ct", 
+                    "type2.add", "type2.int")
+  cand.mods <- list( ) 
+  for(i in 1:length(cand.mod.names)) {
+    cand.mods[[i]] <- get(cand.mod.names[i]) }
+  
+        aictab(cand.set = cand.mods, 
+               modnames = cand.mod.names) %>%
+     rownames_to_column( var = "Model") %>%
+      xtable(caption="AICc table showing that the additive model, with ChargeType and 
+             GameDay terms, is the only competitive model in the model set.") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+   
+    confint(type2.add) %>%
+  as.data.frame %>%
+           round(., 2) %>%
+    rownames_to_column( var = "term") %>%
+      slice(-1) %>%
+        mutate(estimate = round(fixef(type2.add),2 ) ,
+               term = c("Charge type: Property", 
+                        "Charge type: Resisting Arrest", 
+                        "Charge type: Violent", 
+                        "Game day") ) %>%
+      xtable(caption="In the context of the assignment, the take-home of this analysis 
+             is that game day has a positive, non-zero effect on the number of charges filed.", label="tabCIs") %>%
+          print(comment=FALSE, include.rownames=FALSE)
+```
+
+
+```{r, out.width='75%', fig.cap="Charges for violent crimes are the most likely to be reported on game days around major league sports venues in Cleveland. The difference between these and the table above is that the data have been limited to charges filed on game days.\\label{CIs} "}
+  t3.d <- Top3.d %>%  filter(GameDay =="Yes")
+ type3.glm <-  glmer(ChargeCount ~ 0 + ChargeType + (1|Venue), data=t3.d, 
+                    family=poisson(link = "log")) 
+confint(type3.glm) %>%
+  as.data.frame %>%
+    rownames_to_column( var = "term") %>%
+      slice(-1) %>% # Cuts the (Intercept) row
+        mutate(estimate = fixef(type3.glm),
+               term = gsub("[[:lower:]]","", term), 
+               term = gsub(substr(term, 1,2), "", term) ) %>%
+        plyr::rename(c("2.5 %" = "lower", 
+                       "97.5 %" = "upper")) %>%
+  	ggplot() + 
+  	  coord_flip() + theme_bw(20) +
+  	  geom_hline(yintercept = 0) + 
+  	  geom_errorbar(aes(x=term,
+  	                    ymin=lower, 
+  	                    ymax=upper), 
+  	 	                width=0.25, size=1.25, color="#377eb8") +
+  	  geom_point(aes(x=term, 
+  	                 y=estimate), 
+  	             size=5, pch=21, stroke=2, 
+  	             bg="#377eb8", color="white")
+```
+
+\begin{figure}[!b]
+\centering
+\begin{minipage}{0.3\textwidth}
+\caption{A map of downtown Cleveland showing crime clusters in the neighborhood of each major league sports venue. Blue circles denote charges filed on game days while red triangles denote charges filed on non-game days. Symbol size scales with number of charges reported at each location. }
+\end{minipage}% 
+\begin{minipage}{0.7\textwidth}
+\includegraphics[width=1\textwidth]{gg_map-1}
+\end{minipage}
+
+\end{figure}
+
+

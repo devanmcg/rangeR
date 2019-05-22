@@ -1,0 +1,23 @@
+---
+title: "Analysis of Ecosystems homework template"
+date: "Put you name and assignment due date here"
+output: word_document
+---
+```{r echo=FALSE, results='hide'}
+knitr::opts_chunk$set(message = FALSE, warning=FALSE)
+```
+```{r echo=FALSE, results='hide'}
+## Do not delete this!
+## It loads the s20x library for you. If you delete it 
+## your document may not compile.
+require(s20x)
+```
+
+# Question 1 here
+
+```{r}
+## your R code here
+```
+
+
+# Question 2 here
