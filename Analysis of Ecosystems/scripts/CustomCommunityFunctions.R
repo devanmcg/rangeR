@@ -106,7 +106,8 @@ theme_ord <- function (base_size = 12, base_family = "")
 theme_map <- function (base_size = 12, base_family = "") 
 {
   theme_grey(base_size = base_size, base_family = base_family) %+replace% 
-  theme(          panel.grid.major = element_blank(), 
+  theme(          panel.background = element_rect(fill = "white", colour = NA), 
+                  panel.grid.major = element_blank(), 
                   panel.grid.minor = element_blank(), 
                   axis.title = element_blank(), 
                   axis.text = element_blank(), 
