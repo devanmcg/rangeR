@@ -102,3 +102,16 @@ theme_ord <- function (base_size = 12, base_family = "")
           plot.margin = unit(c(2,10,2,2), "mm"), 
           strip.background = element_rect(fill = "lightgreen", colour = "grey50", size = 0.2))
 }
+
+theme_map <- function (base_size = 12, base_family = "") 
+{
+  theme_grey(base_size = base_size, base_family = base_family) %+replace% 
+  theme(          panel.grid.major = element_blank(), 
+                  panel.grid.minor = element_blank(), 
+                  axis.title = element_blank(), 
+                  axis.text = element_blank(), 
+                  axis.ticks = element_blank(), 
+                  panel.border = element_blank(), 
+                  strip.background = element_blank(), 
+                  strip.text = element_text(face = "bold"))
+  }
