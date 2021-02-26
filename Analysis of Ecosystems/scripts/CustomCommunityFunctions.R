@@ -68,6 +68,7 @@ var.view <- function(ord, axes){round(summary(eigenvals(ord))[1:3,1:axes],2)}
 bouncer <- function(data, measure, level, PrintResults) {
   if (measure!="abundance" && measure!="proportion") 
     stop("'measure' must be one of 'abundance' or 'proportion'")
+  data <- as.data.frame(data)
   ab <- as.data.frame(RankAbundance(data))[c(2,6)]
   ab$propfreq <- 100 - ab$accumfreq
   ifelse(measure=="abundance",
