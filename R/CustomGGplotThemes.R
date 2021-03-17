@@ -70,7 +70,7 @@ theme_map <- function (base_size = 12, legend = FALSE)
                  axis.title = element_blank(), 
                  axis.text = element_blank(),
                  axis.ticks.length = unit(0, "cm"), 
-                 panel.spacing = unit(0, "lines"), 
+                 panel.spacing = unit(1, "lines"), 
                  plot.margin = unit(c(-0.5,1,1,1), "lines")))
   }
   else {
@@ -79,7 +79,7 @@ theme_map <- function (base_size = 12, legend = FALSE)
                  axis.title = element_blank(), 
                  axis.text = element_blank(),
                  axis.ticks.length = unit(0, "cm"), 
-                 panel.spacing = unit(0, "lines"), 
+                 panel.spacing = unit(1, "lines"), 
                  plot.margin = unit(c(-0.5,1,1,1), "lines")) )
   }
 }
