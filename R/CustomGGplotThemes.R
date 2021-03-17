@@ -64,7 +64,14 @@ theme_map <- function (base_size = 12, legend = FALSE)
                  legend.title = element_text(size = rel(0.8)),
                  legend.key = element_rect(colour = "white"), 
                  panel.background = element_rect(fill = "white", 
-                                                 colour = NA)))
+                                                 colour = NA), 
+                line = element_blank(), 
+                 rect = element_blank(), 
+                 axis.title = element_blank(), 
+                 axis.text = element_blank(),
+                 axis.ticks.length = unit(0, "cm"), 
+                 panel.spacing = unit(0, "lines"), 
+                 plot.margin = unit(c(-0.5,1,1,1), "lines")))
   }
   else {
     return(theme(line = element_blank(), 
